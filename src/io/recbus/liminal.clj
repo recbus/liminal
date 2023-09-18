@@ -1,4 +1,4 @@
-(ns io.recbus.wcdw
+(ns io.recbus.liminal
   (:require [datomic.client.api :as d]))
 
 (defn- drop-when-change

@@ -1,10 +1,10 @@
-(ns io.recbus.wcdw-test
+(ns io.recbus.liminal-test
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.test :refer [deftest is use-fixtures]]
             [datomic.client.api :as d]
             [datomic.local :as dl]
-            [io.recbus.wcdw :refer [authorized? evaluate] :as sut])
+            [io.recbus.liminal :refer [authorized? evaluate] :as sut])
   (:import (java.io PushbackReader)))
 
 (defn runt-fn!
@@ -27,8 +27,8 @@
 
 (defn db-setup
   [f]
-  (let [system "wcdw"
-        db-name "wcdw"
+  (let [system "liminal"
+        db-name "liminal"
         client (d/client {:server-type :datomic-local
                           :storage-dir :mem
                           :system system})]
@@ -41,9 +41,9 @@
 
 (defn install-schema
   [f]
-  (let [sources ["io/recbus/wcdw/schema.edn"
-                 "io/recbus/wcdw/baseline-roles.edn"
-                 "io/recbus/wcdw/baseline-policies.edn"]]
+  (let [sources ["io/recbus/liminal/schema.edn"
+                 "io/recbus/liminal/baseline-roles.edn"
+                 "io/recbus/liminal/baseline-policies.edn"]]
     (doseq [source sources]
       (let [tx-data (-> source io/resource io/reader (java.io.PushbackReader.) edn/read)]
         (d/transact *connection* {:tx-data tx-data})))
