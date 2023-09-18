@@ -50,34 +50,34 @@
                   [(a-equivalent ?e ?a)
                    [(ground :st.authz.action/*) ?a]]
 
-                  ;; This rule unifies the candidate principle (?p), action (?a) and resource (?r) to a policy..
+                  ;; This rule unifies the candidate principle (?p), action (?a) and resource (?r) to a policy.
                   [(policy ?policy ?p ?a ?r)
                    [?policy :st.authz.policy/principal ?p]
                    [?policy :st.authz.policy/action ?a]
                    [?policy :st.authz.policy/resource ?r]]
 
-                  ;; This rule unifies the candidate ?action with the policy action while introducing the
-                  ;; ?relation keyword which must unify (along with the candidate principal ?p and resource ?r) with
-                  ;; the `pr-relation`rule.  Idiomatically, `pr-relation` unifies the principle ?p and resource ?r
-                  ;; via a reference relationship while the ?relation is bound explicitly to the  keyword naming the
-                  ;; relationship.
+                  ;; This rule unifies the candidate ?action with the policy action while introducing the ?relation
+                  ;; keyword which must unify (along with the candidate principal ?p and resource ?r) with the
+                  ;; pr-relation`rule.  Idiomatically, `pr-relation` unifies the principle ?p and resource ?r
+                  ;; via a reference relationship while the ?relation is bound explicitly to the keyword naming
+                  ;; the relationship.
                   [(policy ?policy ?p ?a ?r)
                    [?policy :st.authz.policy/action ?a]
                    [?policy :st.authz.policy/relation ?relation]
                    (pr-relation ?p ?r ?relation)]
 
-                  ;; This is the degenerate default pr-relation rule binding the ?relation term to a sentinel value that should
-                  ;; never be enumerated  on any policy.
+                  ;; This is the degenerate/default pr-relation rule binding the ?relation term to a sentinel value
+                  ;; that should never be enumerated on any policy.
                   [(pr-relation ?p ?r ?relation)
                    [(ground ::unknown) ?relation]]])
 
 (defn list-scopes
   [db principal action resource]
-  (d/q {:query '[:find ?p ?action ?r
-                 :in $ % ?principal ?action ?resource
-                 :where
-                 , (descendants ?principal ?p)
-                 , (descendants ?resource ?r)]
+  (d/q {:query {:find '[?p ?a ?r]
+                :in '[$ % ?principal ?action ?resource]
+                :where '[(p-equivalent ?principal ?p)
+                         (a-equivalent ?action ?a)
+                         (r-equivalent ?resource ?r)]}
         :args [db base-rules principal action resource]}))
 
 (defn list-descendants
