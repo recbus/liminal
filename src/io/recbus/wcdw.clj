@@ -80,14 +80,6 @@
                          (r-equivalent ?resource ?r)]}
         :args [db base-rules principal action resource]}))
 
-(defn list-descendants
-  [db ancestor]
-  (d/q {:query '[:find (pull ?d [*])
-                 :in $ % ?ancestor
-                 :where
-                 , (descendants ?ancestor ?d)]
-        :args [db base-rules ancestor]}))
-
 (defn evaluate
   [db principals action resource {:keys [context rules] :or {context {} rules []} :as options}]
   (let [rules (concat base-rules rules)
