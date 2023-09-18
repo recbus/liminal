@@ -1,0 +1,15 @@
+[{:db/id                       "principal0"
+  :db/ident                    :acme/principal0
+  :st.authz.principal/children ["principal1"]
+  :acme/owns                   "resource0"}
+
+ {:db/id    "principal1"
+  :db/ident :acme/principal1}
+
+ {:db/id                      "resource0"
+  :db/ident                   :acme/resource0
+  :st.authz.resource/children ["resource1"]
+  :acme/foo                   1}
+
+ {:db/id    "resource1"
+  :db/ident :acme/resource1}]

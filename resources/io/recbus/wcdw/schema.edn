@@ -1,0 +1,47 @@
+[{:db/ident       :st.authz.role/name
+  :db/doc         "The name of the role entity"
+  :db/valueType   :db.type/string
+  :db/cardinality :db.cardinality/one
+  :db/unique      :db.unique/value}
+
+ {:db/ident       :st.authz.principal/children
+  :db/doc         "The child principals included in this principal entity."
+  :db/valueType   :db.type/ref
+  :db/cardinality :db.cardinality/many}
+ {:db/ident       :st.authz.resource/children
+  :db/doc         "The child resources included in this resource entity."
+  :db/valueType   :db.type/ref
+  :db/cardinality :db.cardinality/many}
+
+ {:db/ident       :st.authz.policy/documentation
+  :db/doc         "A string describing this policy."
+  :db/valueType   :db.type/string
+  :db/cardinality :db.cardinality/one}
+ {:db/ident       :st.authz.policy/permit?
+  :db/doc         "The effect of this policy (permit or deny)."
+  :db/valueType   :db.type/boolean
+  :db/cardinality :db.cardinality/one}
+ {:db/ident       :st.authz.policy/effectivity
+  :db/doc         "The power of this policy relative to other policies. A greater value implies a greater effectivity."
+  :db/valueType   :db.type/long
+  :db/cardinality :db.cardinality/one}
+ {:db/ident       :st.authz.policy/principal
+  :db/doc         "The principal entity to which this policy applies."
+  :db/valueType   :db.type/ref
+  :db/cardinality :db.cardinality/many}
+ {:db/ident       :st.authz.policy/action
+  :db/doc         "The operation or access mode to which this policy applies."
+  :db/valueType   :db.type/keyword
+  :db/cardinality :db.cardinality/many}
+ {:db/ident       :st.authz.policy/resource
+  :db/doc         "The resource entity to which this policy applies."
+  :db/valueType   :db.type/ref
+  :db/cardinality :db.cardinality/many}
+ {:db/ident       :st.authz.policy/relation
+  :db/doc         "The named principal:resouce relation to which this policy applies."
+  :db/valueType   :db.type/keyword
+  :db/cardinality :db.cardinality/one}
+ {:db/ident       :st.authz.policy/condition
+  :db/doc         "The name of an externally-evaluated condition which determines if this policy is applicable."
+  :db/valueType   :db.type/symbol
+  :db/cardinality :db.cardinality/one}]

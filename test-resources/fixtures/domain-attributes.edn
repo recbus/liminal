@@ -1,0 +1,6 @@
+[{:db/ident       :acme/owns
+  :db/valueType   :db.type/ref
+  :db/cardinality :db.cardinality/one}
+ {:db/ident       :acme/foo
+  :db/valueType   :db.type/long
+  :db/cardinality :db.cardinality/one}]
