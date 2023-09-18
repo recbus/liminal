@@ -1,19 +1,4 @@
-[{:db/ident       :st.authz.role/name
-  :db/doc         "The name of the role entity"
-  :db/valueType   :db.type/string
-  :db/cardinality :db.cardinality/one
-  :db/unique      :db.unique/value}
-
- {:db/ident       :st.authz.principal/children
-  :db/doc         "The child principals included in this principal entity."
-  :db/valueType   :db.type/ref
-  :db/cardinality :db.cardinality/many}
- {:db/ident       :st.authz.resource/children
-  :db/doc         "The child resources included in this resource entity."
-  :db/valueType   :db.type/ref
-  :db/cardinality :db.cardinality/many}
-
- {:db/ident       :st.authz.policy/documentation
+[{:db/ident       :st.authz.policy/documentation
   :db/doc         "A string describing this policy."
   :db/valueType   :db.type/string
   :db/cardinality :db.cardinality/one}
@@ -44,4 +29,14 @@
  {:db/ident       :st.authz.policy/condition
   :db/doc         "The name of an externally-evaluated condition which determines if this policy is applicable."
   :db/valueType   :db.type/symbol
-  :db/cardinality :db.cardinality/one}]
+  :db/cardinality :db.cardinality/one}
+
+ ;; Generic AuthZ Hierarchy
+ {:db/ident       :st.authz.principal/children
+  :db/doc         "The child principals included in this principal entity."
+  :db/valueType   :db.type/ref
+  :db/cardinality :db.cardinality/many}
+ {:db/ident       :st.authz.resource/children
+  :db/doc         "The child resources included in this resource entity."
+  :db/valueType   :db.type/ref
+  :db/cardinality :db.cardinality/many}]
