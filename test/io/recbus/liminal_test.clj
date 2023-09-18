@@ -68,11 +68,11 @@
     (is (not (authorized? db [:acme/principal1] :read :acme/resource1)))))
 
 (deftest explicit-policy
-  (let [policy {:st.authz.policy/permit?   true
-                :st.authz.policy/effectivity 0
-                :st.authz.policy/principal :acme/principal0
-                :st.authz.policy/action    :read
-                :st.authz.policy/resource  :acme/resource0}
+  (let [policy {:liminal.policy/permit?   true
+                :liminal.policy/effectivity 0
+                :liminal.policy/principal :acme/principal0
+                :liminal.policy/action    :read
+                :liminal.policy/resource  :acme/resource0}
         {db :db-after} (d/transact *connection* {:tx-data [policy]})]
     (is (authorized? db [:acme/principal0] :read :acme/resource0))
     (is (not (authorized? db [:acme/principal0] :read :acme/resource1)))
@@ -80,11 +80,11 @@
     (is (not (authorized? db [:acme/principal1] :read :acme/resource1)))))
 
 (deftest wildcard-principal-policy
-  (let [policy {:st.authz.policy/permit?   true
-                :st.authz.policy/effectivity 0
-                :st.authz.policy/principal :st.authz.principal/*
-                :st.authz.policy/action    :read
-                :st.authz.policy/resource  :acme/resource0}
+  (let [policy {:liminal.policy/permit?   true
+                :liminal.policy/effectivity 0
+                :liminal.policy/principal :liminal.principal/*
+                :liminal.policy/action    :read
+                :liminal.policy/resource  :acme/resource0}
         {db :db-after} (d/transact *connection* {:tx-data [policy]})]
     (is (authorized? db [:acme/principal0] :read :acme/resource0))
     (is (not (authorized? db [:acme/principal0] :read :acme/resource1)))
@@ -92,11 +92,11 @@
     (is (not (authorized? db [:acme/principal1] :read :acme/resource1)))))
 
 (deftest wildcard-action-policy
-  (let [policy {:st.authz.policy/permit?   true
-                :st.authz.policy/effectivity 0
-                :st.authz.policy/principal :acme/principal0
-                :st.authz.policy/action    :st.authz.action/*
-                :st.authz.policy/resource  :acme/resource0}
+  (let [policy {:liminal.policy/permit?   true
+                :liminal.policy/effectivity 0
+                :liminal.policy/principal :acme/principal0
+                :liminal.policy/action    :liminal.action/*
+                :liminal.policy/resource  :acme/resource0}
         {db :db-after} (d/transact *connection* {:tx-data [policy]})]
     (is (authorized? db [:acme/principal0] :read :acme/resource0))
     (is (not (authorized? db [:acme/principal0] :read :acme/resource1)))
@@ -104,11 +104,11 @@
     (is (not (authorized? db [:acme/principal1] :read :acme/resource1)))))
 
 (deftest wildcard-resource-policy
-  (let [policy {:st.authz.policy/permit?   true
-                :st.authz.policy/effectivity 0
-                :st.authz.policy/principal :acme/principal0
-                :st.authz.policy/action    :read
-                :st.authz.policy/resource  :st.authz.resource/*}
+  (let [policy {:liminal.policy/permit?   true
+                :liminal.policy/effectivity 0
+                :liminal.policy/principal :acme/principal0
+                :liminal.policy/action    :read
+                :liminal.policy/resource  :liminal.resource/*}
         {db :db-after} (d/transact *connection* {:tx-data [policy]})]
     (is (authorized? db [:acme/principal0] :read :acme/resource0))
     (is (authorized? db [:acme/principal0] :read :acme/resource1))
@@ -116,11 +116,11 @@
     (is (not (authorized? db [:acme/principal1] :read :acme/resource1)))))
 
 (deftest principal-descendant-policy
-  (let [policy {:st.authz.policy/permit?   true
-                :st.authz.policy/effectivity 0
-                :st.authz.policy/principal :acme/principal1
-                :st.authz.policy/action    :read
-                :st.authz.policy/resource  :acme/resource0}
+  (let [policy {:liminal.policy/permit?   true
+                :liminal.policy/effectivity 0
+                :liminal.policy/principal :acme/principal1
+                :liminal.policy/action    :read
+                :liminal.policy/resource  :acme/resource0}
         {db :db-after} (d/transact *connection* {:tx-data [policy]})]
     (is (authorized? db [:acme/principal0] :read :acme/resource0))
     (is (not (authorized? db [:acme/principal0] :read :acme/resource1)))
@@ -128,10 +128,10 @@
     (is (not (authorized? db [:acme/principal1] :read :acme/resource1)))))
 
 (deftest principal-resource-relation-policy
-  (let [policy {:st.authz.policy/permit?   true
-                :st.authz.policy/effectivity 0
-                :st.authz.policy/action    :read
-                :st.authz.policy/relation :acme/owns}
+  (let [policy {:liminal.policy/permit?   true
+                :liminal.policy/effectivity 0
+                :liminal.policy/action    :read
+                :liminal.policy/relation :acme/owns}
         {db :db-after} (d/transact *connection* {:tx-data [policy]})
         rules '[[(pr-relation ?p ?r ?relation)
                  [?p :acme/owns ?r]
@@ -144,13 +144,13 @@
     (is (not (authorized? db [:acme/principal1] :read :acme/resource1)))))
 
 (deftest custom-policy-interpreter
-  (let [policy {:st.authz.policy/permit?   true
-                :st.authz.policy/effectivity 0
-                :st.authz.policy/action    :write
-                :st.authz.policy/relation :acme/X}
+  (let [policy {:liminal.policy/permit?   true
+                :liminal.policy/effectivity 0
+                :liminal.policy/action    :write
+                :liminal.policy/relation :acme/X}
         {db :db-after} (d/transact *connection* {:tx-data [policy]})
         rules '[[(policy ?policy ?p ?a ?r)
-                 [?policy :st.authz.policy/relation :acme/X]
+                 [?policy :liminal.policy/relation :acme/X]
                  [?r :acme/foo]]]]
     (is (authorized? db [:acme/principal0] :write :acme/resource0 :rules rules))
     (is (authorized? db [:acme/principal1] :write :acme/resource0 :rules rules))
@@ -161,16 +161,16 @@
     (is (not (authorized? db [:acme/principal1] :read :acme/resource1)))))
 
 (deftest effectivity-dominates
-  (let [policy0        {:st.authz.policy/permit?     true
-                        :st.authz.policy/effectivity 0
-                        :st.authz.policy/principal   :acme/principal0
-                        :st.authz.policy/action      :read
-                        :st.authz.policy/resource    :acme/resource0}
-        policy1        {:st.authz.policy/permit?     false
-                        :st.authz.policy/effectivity 10
-                        :st.authz.policy/principal   :acme/principal0
-                        :st.authz.policy/action      :read
-                        :st.authz.policy/resource    :acme/resource0}
+  (let [policy0        {:liminal.policy/permit?     true
+                        :liminal.policy/effectivity 0
+                        :liminal.policy/principal   :acme/principal0
+                        :liminal.policy/action      :read
+                        :liminal.policy/resource    :acme/resource0}
+        policy1        {:liminal.policy/permit?     false
+                        :liminal.policy/effectivity 10
+                        :liminal.policy/principal   :acme/principal0
+                        :liminal.policy/action      :read
+                        :liminal.policy/resource    :acme/resource0}
         {db :db-after} (d/transact *connection* {:tx-data [policy0 policy1]})]
     (is (not (authorized? db [:acme/principal0] :read :acme/resource0)))
     (is (not (authorized? db [:acme/principal0] :read :acme/resource1)))
@@ -182,12 +182,12 @@
   (= "192.168.1.1" source))
 
 (deftest conditioned-policy
-  (let [policy {:st.authz.policy/permit?   true
-                :st.authz.policy/effectivity 0
-                :st.authz.policy/principal :acme/principal0
-                :st.authz.policy/action    :write
-                :st.authz.policy/resource    :acme/resource0
-                :st.authz.policy/condition `conditional-test}
+  (let [policy {:liminal.policy/permit?   true
+                :liminal.policy/effectivity 0
+                :liminal.policy/principal :acme/principal0
+                :liminal.policy/action    :write
+                :liminal.policy/resource    :acme/resource0
+                :liminal.policy/condition `conditional-test}
         {db :db-after} (d/transact *connection* {:tx-data [policy]})]
     (is (authorized? db [:acme/principal0] :write :acme/resource0 :context {:source "192.168.1.1"}))
     (is (not (authorized? db [:acme/principal0] :write :acme/resource0 :context {:source "192.168.1.2"})))))

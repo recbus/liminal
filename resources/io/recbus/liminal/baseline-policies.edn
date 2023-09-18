@@ -1,13 +1,13 @@
-[{:st.authz.policy/documentation "The Default Deny Policy"
-  :st.authz.policy/permit?       false
-  :st.authz.policy/effectivity   -1000
-  :st.authz.policy/principal     :st.authz.principal/*
-  :st.authz.policy/action        [:st.authz.action/*]
-  :st.authz.policy/resource      :st.authz.resource/*}
+[{:liminal.policy/documentation "The Default Deny Policy"
+  :liminal.policy/permit?       false
+  :liminal.policy/effectivity   -1000
+  :liminal.policy/principal     :liminal.principal/*
+  :liminal.policy/action        [:liminal.action/*]
+  :liminal.policy/resource      :liminal.resource/*}
 
- {:st.authz.policy/documentation "Superuser Policy"
-  :st.authz.policy/permit?       true
-  :st.authz.policy/effectivity   1000
-  :st.authz.policy/principal     :st.authz.principal/Superuser
-  :st.authz.policy/action        [:st.authz/*]
-  :st.authz.policy/resource      :st.authz.resource/*}]
+ {:liminal.policy/documentation "Superuser Policy"
+  :liminal.policy/permit?       true
+  :liminal.policy/effectivity   1000
+  :liminal.policy/principal     :liminal.principal/Superuser
+  :liminal.policy/action        [:liminal/*]
+  :liminal.policy/resource      :liminal.resource/*}]

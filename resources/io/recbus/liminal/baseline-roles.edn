@@ -1,8 +1,8 @@
 [{:db/id    "Anonymous"
-  :db/ident :st.authz.principal/Anonymous}
+  :db/ident :liminal.principal/Anonymous}
  {:db/id    "Superuser"
-  :db/ident :st.authz.principal/Superuser}
+  :db/ident :liminal.principal/Superuser}
  {:db/id "Wildcard Principal"
-  :db/ident :st.authz.principal/*}
+  :db/ident :liminal.principal/*}
  {:db/id "Wildcard Resource"
-  :db/ident :st.authz.resource/*}]
+  :db/ident :liminal.resource/*}]

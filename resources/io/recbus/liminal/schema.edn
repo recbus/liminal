@@ -1,42 +1,42 @@
-[{:db/ident       :st.authz.policy/documentation
+[{:db/ident       :liminal.policy/documentation
   :db/doc         "A string describing this policy."
   :db/valueType   :db.type/string
   :db/cardinality :db.cardinality/one}
- {:db/ident       :st.authz.policy/permit?
+ {:db/ident       :liminal.policy/permit?
   :db/doc         "The effect of this policy (permit or deny)."
   :db/valueType   :db.type/boolean
   :db/cardinality :db.cardinality/one}
- {:db/ident       :st.authz.policy/effectivity
+ {:db/ident       :liminal.policy/effectivity
   :db/doc         "The power of this policy relative to other policies. A greater value implies a greater effectivity."
   :db/valueType   :db.type/long
   :db/cardinality :db.cardinality/one}
- {:db/ident       :st.authz.policy/principal
+ {:db/ident       :liminal.policy/principal
   :db/doc         "The principal entity to which this policy applies."
   :db/valueType   :db.type/ref
   :db/cardinality :db.cardinality/many}
- {:db/ident       :st.authz.policy/action
+ {:db/ident       :liminal.policy/action
   :db/doc         "The operation or access mode to which this policy applies."
   :db/valueType   :db.type/keyword
   :db/cardinality :db.cardinality/many}
- {:db/ident       :st.authz.policy/resource
+ {:db/ident       :liminal.policy/resource
   :db/doc         "The resource entity to which this policy applies."
   :db/valueType   :db.type/ref
   :db/cardinality :db.cardinality/many}
- {:db/ident       :st.authz.policy/relation
+ {:db/ident       :liminal.policy/relation
   :db/doc         "The named principal:resouce relation to which this policy applies."
   :db/valueType   :db.type/keyword
   :db/cardinality :db.cardinality/one}
- {:db/ident       :st.authz.policy/condition
+ {:db/ident       :liminal.policy/condition
   :db/doc         "The name of an externally-evaluated condition which determines if this policy is applicable."
   :db/valueType   :db.type/symbol
   :db/cardinality :db.cardinality/one}
 
  ;; Generic AuthZ Hierarchy
- {:db/ident       :st.authz.principal/children
+ {:db/ident       :liminal.principal/children
   :db/doc         "The child principals included in this principal entity."
   :db/valueType   :db.type/ref
   :db/cardinality :db.cardinality/many}
- {:db/ident       :st.authz.resource/children
+ {:db/ident       :liminal.resource/children
   :db/doc         "The child resources included in this resource entity."
   :db/valueType   :db.type/ref
   :db/cardinality :db.cardinality/many}]

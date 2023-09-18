@@ -34,27 +34,27 @@
                   [(p-equivalent ?e ?p)
                    [(identity ?e) ?p]]
                   [(p-equivalent ?e ?p)
-                   (walk ?e :st.authz.principal/children ?p)]
+                   (walk ?e :liminal.principal/children ?p)]
                   [(p-equivalent ?e ?p)
-                   [?p :db/ident :st.authz.principal/*]]
+                   [?p :db/ident :liminal.principal/*]]
 
                   [(r-equivalent ?e ?r)
                    [(identity ?e) ?r]]
                   [(r-equivalent ?e ?r)
-                   (walk ?e :st.authz.resource/children ?r)]
+                   (walk ?e :liminal.resource/children ?r)]
                   [(r-equivalent ?e ?r)
-                   [?r :db/ident :st.authz.resource/*]]
+                   [?r :db/ident :liminal.resource/*]]
 
                   [(a-equivalent ?e ?a)
                    [(identity ?e) ?a]]
                   [(a-equivalent ?e ?a)
-                   [(ground :st.authz.action/*) ?a]]
+                   [(ground :liminal.action/*) ?a]]
 
                   ;; This rule unifies the candidate principle (?p), action (?a) and resource (?r) to a policy.
                   [(policy ?policy ?p ?a ?r)
-                   [?policy :st.authz.policy/principal ?p]
-                   [?policy :st.authz.policy/action ?a]
-                   [?policy :st.authz.policy/resource ?r]]
+                   [?policy :liminal.policy/principal ?p]
+                   [?policy :liminal.policy/action ?a]
+                   [?policy :liminal.policy/resource ?r]]
 
                   ;; This rule unifies the candidate ?action with the policy action while introducing the ?relation
                   ;; keyword which must unify (along with the candidate principal ?p and resource ?r) with the
@@ -62,8 +62,8 @@
                   ;; via a reference relationship while the ?relation is bound explicitly to the keyword naming
                   ;; the relationship.
                   [(policy ?policy ?p ?a ?r)
-                   [?policy :st.authz.policy/action ?a]
-                   [?policy :st.authz.policy/relation ?relation]
+                   [?policy :liminal.policy/action ?a]
+                   [?policy :liminal.policy/relation ?relation]
                    (pr-relation ?p ?r ?relation)]
 
                   ;; This is the degenerate/default pr-relation rule binding the ?relation term to a sentinel value
@@ -92,10 +92,10 @@
                                      , (policy ?policy ?p ?a ?r)]
                             :args [db rules principals action resource]})
                       (map first)
-                      (sort-by :st.authz.policy/effectivity (fn [x y] (compare y x))))
+                      (sort-by :liminal.policy/effectivity (fn [x y] (compare y x))))
         ;; Evaluate policies such that the presumably expensive `satisfied?` operation is short-circuted as soon as possible
         decision (when (seq policies)
-                   (transduce (comp (filter (fn [{:st.authz.policy/keys [condition] :as policy}]
+                   (transduce (comp (filter (fn [{:liminal.policy/keys [condition] :as policy}]
                                               (if condition
                                                 (satisfied? condition (assoc context
                                                                              ::db db
@@ -104,8 +104,8 @@
                                                                              ::action action
                                                                              ::resource resource))
                                                 true)))
-                                    (drop-when-change :st.authz.policy/effectivity))
-                              (completing (fn [allow? {:st.authz.policy/keys [permit?] :as policy}]
+                                    (drop-when-change :liminal.policy/effectivity))
+                              (completing (fn [allow? {:liminal.policy/keys [permit?] :as policy}]
                                             (and allow? permit?)))
                               true
                               policies))]
