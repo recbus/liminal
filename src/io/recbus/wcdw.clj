@@ -1,29 +1,6 @@
 (ns io.recbus.wcdw
   (:require [datomic.client.api :as d]))
 
-(defn- db-attr?
-  [db x]
-  (and (qualified-keyword? x) (d/pull db [:db/valueType] x)))
-
-(defn permit!
-  "Install an authorization policy allowing the principal to perform the `action` on the resource.  The princiapl and resource
-  can be specified generally as a named relation keyword or as a tuple where the first element identifies the principal and the
-  second element identifies the resource.  Each can be identified by either a Datomic entity identifier or as a type whose members
-  all have the given attribute."
-  [{conn :datomic/connection :as _system} action p-r-or-rel & {:keys [condition annotation effectivity] :or {effectivity 0}}]
-  (let [policy (cond-> {:st.authz.policy/permit? true
-                        :st.authz.policy/effectivity effectivity
-                        :st.authz.policy/action action}
-                 annotation (assoc :st.authz.policy/annotation annotation)
-                 condition (assoc :st.authz.policy/condition condition)
-                 (keyword? p-r-or-rel) (assoc :st.authz.policy/relation p-r-or-rel)
-                 (sequential? p-r-or-rel) (merge (let [[p r] p-r-or-rel
-                                                       db (d/db conn)]
-                                                   (-> {}
-                                                       (assoc (if (db-attr? db p) :st.authz.policy/p-attr :st.authz.policy/principal) p)
-                                                       (assoc (if (db-attr? db r) :st.authz.policy/r-attr :st.authz.policy/resource) r)))))]
-    (d/transact conn {:tx-data [policy]})))
-
 (defn- drop-when-change
   "Return a stateful transducer that drops all remaining elements when (f element) changes from (f (first element))."
   [f]
