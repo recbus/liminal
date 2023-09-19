@@ -3,4 +3,7 @@
   :db/cardinality :db.cardinality/one}
  {:db/ident       :acme/foo
   :db/valueType   :db.type/long
+  :db/cardinality :db.cardinality/one}
+ {:db/ident       :acme/bar
+  :db/valueType   :db.type/long
   :db/cardinality :db.cardinality/one}]

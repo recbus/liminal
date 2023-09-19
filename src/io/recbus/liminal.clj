@@ -50,11 +50,19 @@
                   [(a-equivalent ?e ?a)
                    [(ground :liminal.action/*) ?a]]
 
-                  ;; This rule unifies the candidate principle (?p), action (?a) and resource (?r) to a policy.
+                  ;; This rule unifies the candidate principle (?p), action (?a) and resource (?r) to a policy ?policy,
+                  ;; where principal and resource unification can either be through explicit entity attributes or indirectly
+                  ;; via a schema attribute entity.
                   [(policy ?policy ?p ?a ?r)
-                   [?policy :liminal.policy/principal ?p]
+                   (or-join [?policy ?p]
+                            [?policy :liminal.policy/principal ?p]
+                            (and [?policy :liminal.policy/principal ?attr]
+                                 [?p ?attr]))
                    [?policy :liminal.policy/action ?a]
-                   [?policy :liminal.policy/resource ?r]]
+                   (or-join [?policy ?r]
+                            [?policy :liminal.policy/resource ?r]
+                            (and [?policy :liminal.policy/resource ?attr]
+                                 [?r ?attr]))]
 
                   ;; This rule unifies the candidate ?action with the policy action while introducing the ?relation
                   ;; keyword which must unify (along with the candidate principal ?p and resource ?r) with the

@@ -1,15 +1,18 @@
-[{:db/id                       "principal0"
-  :db/ident                    :acme/principal0
-  :liminal.principal/children ["principal1"]
-  :acme/owns                   "resource0"}
+[{:db/id                      "principal0"
+  :db/ident                   :acme/principal0
+  :acme/foo                   0
+  :acme/owns                  "resource0"
+  :liminal.principal/children ["principal1"]}
 
  {:db/id    "principal1"
-  :db/ident :acme/principal1}
+  :db/ident :acme/principal1
+  :acme/foo 1}
 
- {:db/id                      "resource0"
-  :db/ident                   :acme/resource0
-  :liminal.resource/children ["resource1"]
-  :acme/foo                   1}
+ {:db/id                     "resource0"
+  :db/ident                  :acme/resource0
+  :acme/bar                  0
+  :liminal.resource/children ["resource1"]}
 
  {:db/id    "resource1"
-  :db/ident :acme/resource1}]
+  :db/ident :acme/resource1
+  :acme/bar 1}]

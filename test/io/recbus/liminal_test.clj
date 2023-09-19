@@ -143,6 +143,30 @@
     (is (not (authorized? db [:acme/principal1] :read :acme/resource0)))
     (is (not (authorized? db [:acme/principal1] :read :acme/resource1)))))
 
+(deftest principal-attribute-policy
+  (let [policy {:liminal.policy/permit?   true
+                :liminal.policy/effectivity 0
+                :liminal.policy/principal :acme/foo
+                :liminal.policy/action    :read
+                :liminal.policy/resource :acme/resource0}
+        {db :db-after} (d/transact *connection* {:tx-data [policy]})]
+    (is (authorized? db [:acme/principal0] :read :acme/resource0))
+    (is (not (authorized? db [:acme/principal0] :read :acme/resource1)))
+    (is (authorized? db [:acme/principal1] :read :acme/resource0))
+    (is (not (authorized? db [:acme/principal1] :read :acme/resource1)))))
+
+(deftest resource-attribute-policy
+  (let [policy {:liminal.policy/permit?   true
+                :liminal.policy/effectivity 0
+                :liminal.policy/principal :acme/principal0
+                :liminal.policy/action    :read
+                :liminal.policy/resource :acme/bar}
+        {db :db-after} (d/transact *connection* {:tx-data [policy]})]
+    (is (authorized? db [:acme/principal0] :read :acme/resource0))
+    (is (authorized? db [:acme/principal0] :read :acme/resource1))
+    (is (not (authorized? db [:acme/principal1] :read :acme/resource0)))
+    (is (not (authorized? db [:acme/principal1] :read :acme/resource1)))))
+
 (deftest custom-policy-interpreter
   (let [policy {:liminal.policy/permit?   true
                 :liminal.policy/effectivity 0
@@ -151,10 +175,10 @@
         {db :db-after} (d/transact *connection* {:tx-data [policy]})
         rules '[[(policy ?policy ?p ?a ?r)
                  [?policy :liminal.policy/relation :acme/X]
-                 [?r :acme/foo]]]]
+                 [?p :acme/foo 0]]]]
     (is (authorized? db [:acme/principal0] :write :acme/resource0 :rules rules))
-    (is (authorized? db [:acme/principal1] :write :acme/resource0 :rules rules))
-    (is (not (authorized? db [:acme/principal0] :write :acme/resource1 :rules rules)))
+    (is (authorized? db [:acme/principal0] :write :acme/resource1 :rules rules))
+    (is (not (authorized? db [:acme/principal1] :write :acme/resource0 :rules rules)))
     (is (not (authorized? db [:acme/principal0] :read :acme/resource0)))
     (is (not (authorized? db [:acme/principal0] :read :acme/resource1)))
     (is (not (authorized? db [:acme/principal1] :read :acme/resource0)))
