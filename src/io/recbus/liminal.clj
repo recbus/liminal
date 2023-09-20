@@ -37,23 +37,23 @@
                    [?from :liminal.resource/children ?intermediate]
                    (r-walk ?intermediate ?to)]
 
-                  [(p-equivalent ?e ?p)
+                  [(p* ?e ?p)
                    [(identity ?e) ?p]]
-                  [(p-equivalent ?e ?p)
+                  [(p* ?e ?p)
                    (p-walk ?e ?p)]
-                  [(p-equivalent ?e ?p)
+                  [(p* ?e ?p)
                    [?p :db/ident :liminal.principal/*]]
 
-                  [(r-equivalent ?e ?r)
+                  [(r* ?e ?r)
                    [(identity ?e) ?r]]
-                  [(r-equivalent ?e ?r)
+                  [(r* ?e ?r)
                    (r-walk ?r ?e)]
-                  [(r-equivalent ?e ?r)
+                  [(r* ?e ?r)
                    [?r :db/ident :liminal.resource/*]]
 
-                  [(a-equivalent ?e ?a)
+                  [(a* ?e ?a)
                    [(identity ?e) ?a]]
-                  [(a-equivalent ?e ?a)
+                  [(a* ?e ?a)
                    [(ground :liminal.action/*) ?a]]
 
                   ;; This rule unifies the candidate principle (?p), action (?a) and resource (?r) to a policy ?policy,
@@ -89,9 +89,9 @@
   [db principal action resource]
   (d/q {:query {:find '[?p ?a ?r]
                 :in '[$ % ?principal ?action ?resource]
-                :where '[(p-equivalent ?principal ?p)
-                         (a-equivalent ?action ?a)
-                         (r-equivalent ?resource ?r)]}
+                :where '[(p* ?principal ?p)
+                         (a* ?action ?a)
+                         (r* ?resource ?r)]}
         :args [db base-rules principal action resource]}))
 
 (defn evaluate
@@ -99,9 +99,9 @@
   (let [rules (concat base-rules rules)
         policies (->> (d/q {:query '{:find [(pull ?policy [*])]
                                      :in [$ % [?principal ...] ?action ?resource]
-                                     :where [(p-equivalent ?principal ?p)
-                                             (a-equivalent ?action ?a)
-                                             (r-equivalent ?resource ?r)
+                                     :where [(p* ?principal ?p)
+                                             (a* ?action ?a)
+                                             (r* ?resource ?r)
                                              (policy ?policy ?p ?a ?r)]}
                             :args [db rules principals action resource]})
                       (map first)
