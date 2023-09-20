@@ -42,8 +42,7 @@
 (defn install-schema
   [f]
   (let [sources ["io/recbus/liminal/schema.edn"
-                 "io/recbus/liminal/baseline-roles.edn"
-                 "io/recbus/liminal/baseline-policies.edn"]]
+                 "io/recbus/liminal/seeds.edn"]]
     (doseq [source sources]
       (let [tx-data (-> source io/resource io/reader (java.io.PushbackReader.) edn/read)]
         (d/transact *connection* {:tx-data tx-data})))

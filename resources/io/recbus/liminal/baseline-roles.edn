@@ -1,8 +1,0 @@
-[{:db/id    "Anonymous"
-  :db/ident :liminal.principal/Anonymous}
- {:db/id    "Superuser"
-  :db/ident :liminal.principal/Superuser}
- {:db/id "Wildcard Principal"
-  :db/ident :liminal.principal/*}
- {:db/id "Wildcard Resource"
-  :db/ident :liminal.resource/*}]

@@ -1,0 +1,22 @@
+[{:db/id    "Anonymous"
+  :db/ident :liminal.principal/Anonymous}
+ {:db/id    "Superuser"
+  :db/ident :liminal.principal/Superuser}
+ {:db/id "Wildcard Principal"
+  :db/ident :liminal.principal/*}
+ {:db/id "Wildcard Resource"
+  :db/ident :liminal.resource/*}
+
+ {:liminal.policy/documentation "The Default Deny Policy"
+  :liminal.policy/permit?       false
+  :liminal.policy/effectivity   -1000
+  :liminal.policy/principal     "Wildcard Principal"
+  :liminal.policy/action        [:liminal.action/*]
+  :liminal.policy/resource      "Wildcard Resource"}
+
+ {:liminal.policy/documentation "Superuser Policy"
+  :liminal.policy/permit?       true
+  :liminal.policy/effectivity   1000
+  :liminal.policy/principal     "Superuser"
+  :liminal.policy/action        [:liminal/*]
+  :liminal.policy/resource      "Wildcard Resource"}]
