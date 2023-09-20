@@ -5,7 +5,7 @@
 
  {:liminal.policy/documentation "The Default Deny Policy"
   :liminal.policy/permit?       false
-  :liminal.policy/effectivity   -1000
+  :liminal.policy/effectivity   -2147483648
   :liminal.policy/principal     "Wildcard Principal"
   :liminal.policy/action        [:liminal.action/*]
   :liminal.policy/resource      "Wildcard Resource"}]
