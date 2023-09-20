@@ -25,23 +25,29 @@
     (throw (ex-info "Condition symbol not resolved!" {::condition condition ::context context}))))
 
 (def base-rules '[;; walk a graph from ?from to ?to via ?attr
-                  [(walk ?from ?attr ?to)
-                   [?from ?attr ?to]]
-                  [(walk ?from ?attr ?to)
-                   [?from ?attr ?intermediate]
-                   (walk ?intermediate ?attr ?to)]
+                  [(p-walk ?from ?to)
+                   [?from :liminal.principal/children ?to]]
+                  [(p-walk ?from ?to)
+                   [?from :liminal.principal/children ?intermediate]
+                   (p-walk ?intermediate ?to)]
+
+                  [(r-walk ?from ?to)
+                   [?from :liminal.resource/children ?to]]
+                  [(r-walk ?from ?to)
+                   [?from :liminal.resource/children ?intermediate]
+                   (r-walk ?intermediate ?to)]
 
                   [(p-equivalent ?e ?p)
                    [(identity ?e) ?p]]
                   [(p-equivalent ?e ?p)
-                   (walk ?e :liminal.principal/children ?p)]
+                   (p-walk ?e ?p)]
                   [(p-equivalent ?e ?p)
                    [?p :db/ident :liminal.principal/*]]
 
                   [(r-equivalent ?e ?r)
                    [(identity ?e) ?r]]
                   [(r-equivalent ?e ?r)
-                   (walk ?e :liminal.resource/children ?r)]
+                   (r-walk ?r ?e)]
                   [(r-equivalent ?e ?r)
                    [?r :db/ident :liminal.resource/*]]
 
@@ -91,13 +97,12 @@
 (defn evaluate
   [db principals action resource {:keys [context rules] :or {context {} rules []} :as options}]
   (let [rules (concat base-rules rules)
-        policies (->> (d/q {:query '[:find (pull ?policy [*])
-                                     :in $ % [?principal ...] ?action ?resource
-                                     :where
-                                     , (p-equivalent ?principal ?p)
-                                     , (a-equivalent ?action ?a)
-                                     , (r-equivalent ?resource ?r)
-                                     , (policy ?policy ?p ?a ?r)]
+        policies (->> (d/q {:query '{:find [(pull ?policy [*])]
+                                     :in [$ % [?principal ...] ?action ?resource]
+                                     :where [(p-equivalent ?principal ?p)
+                                             (a-equivalent ?action ?a)
+                                             (r-equivalent ?resource ?r)
+                                             (policy ?policy ?p ?a ?r)]}
                             :args [db rules principals action resource]})
                       (map first)
                       (sort-by :liminal.policy/effectivity (fn [x y] (compare y x))))

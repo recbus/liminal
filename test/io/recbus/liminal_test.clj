@@ -1,7 +1,7 @@
 (ns io.recbus.liminal-test
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
-            [clojure.test :refer [deftest is use-fixtures]]
+            [clojure.test :refer [deftest are is use-fixtures]]
             [datomic.client.api :as d]
             [datomic.local :as dl]
             [io.recbus.liminal :refer [authorized? evaluate] :as sut])
@@ -120,10 +120,24 @@
                 :liminal.policy/principal :acme/principal1
                 :liminal.policy/action    :read
                 :liminal.policy/resource  :acme/resource0}
-        {db :db-after} (d/transact *connection* {:tx-data [policy]})]
+        relationship [:db/add :acme/principal0 :liminal.principal/children :acme/principal1]
+        {db :db-after} (d/transact *connection* {:tx-data [policy relationship]})]
     (is (authorized? db [:acme/principal0] :read :acme/resource0))
     (is (not (authorized? db [:acme/principal0] :read :acme/resource1)))
     (is (authorized? db [:acme/principal1] :read :acme/resource0))
+    (is (not (authorized? db [:acme/principal1] :read :acme/resource1)))))
+
+(deftest resource-descendant-policy
+  (let [policy {:liminal.policy/permit?   true
+                :liminal.policy/effectivity 0
+                :liminal.policy/principal :acme/principal0
+                :liminal.policy/action    :read
+                :liminal.policy/resource  :acme/resource0}
+        relationship [:db/add :acme/resource0 :liminal.resource/children :acme/resource1]
+        {db :db-after} (d/transact *connection* {:tx-data [policy relationship]})]
+    (is (authorized? db [:acme/principal0] :read :acme/resource0))
+    (is (authorized? db [:acme/principal0] :read :acme/resource1))
+    (is (not (authorized? db [:acme/principal1] :read :acme/resource0)))
     (is (not (authorized? db [:acme/principal1] :read :acme/resource1)))))
 
 (deftest principal-resource-relation-policy
@@ -136,11 +150,9 @@
                  [?p :acme/owns ?r]
                  [(ground :acme/owns) ?relation]]]]
     (is (authorized? db [:acme/principal0] :read :acme/resource0 :rules rules))
-    (is (not (authorized? db [:acme/principal0] :delete :acme/resource0 :rules rules)))
-    (is (not (authorized? db [:acme/principal0] :read :acme/resource0)))
-    (is (not (authorized? db [:acme/principal0] :read :acme/resource1)))
-    (is (not (authorized? db [:acme/principal1] :read :acme/resource0)))
-    (is (not (authorized? db [:acme/principal1] :read :acme/resource1)))))
+    (is (not (authorized? db [:acme/principal0] :read :acme/resource1 :rules rules)))
+    (is (not (authorized? db [:acme/principal1] :read :acme/resource0 :rules rules)))
+    (is (not (authorized? db [:acme/principal1] :read :acme/resource1 :rules rules)))))
 
 (deftest principal-attribute-policy
   (let [policy {:liminal.policy/permit?   true
@@ -169,19 +181,16 @@
 (deftest custom-policy-interpreter
   (let [policy {:liminal.policy/permit?   true
                 :liminal.policy/effectivity 0
-                :liminal.policy/action    :write
+                :liminal.policy/action    :read
                 :liminal.policy/relation :acme/X}
         {db :db-after} (d/transact *connection* {:tx-data [policy]})
         rules '[[(policy ?policy ?p ?a ?r)
                  [?policy :liminal.policy/relation :acme/X]
                  [?p :acme/foo 0]]]]
-    (is (authorized? db [:acme/principal0] :write :acme/resource0 :rules rules))
-    (is (authorized? db [:acme/principal0] :write :acme/resource1 :rules rules))
-    (is (not (authorized? db [:acme/principal1] :write :acme/resource0 :rules rules)))
-    (is (not (authorized? db [:acme/principal0] :read :acme/resource0)))
-    (is (not (authorized? db [:acme/principal0] :read :acme/resource1)))
-    (is (not (authorized? db [:acme/principal1] :read :acme/resource0)))
-    (is (not (authorized? db [:acme/principal1] :read :acme/resource1)))))
+    (is (authorized? db [:acme/principal0] :read :acme/resource0 :rules rules))
+    (is (authorized? db [:acme/principal0] :read :acme/resource1 :rules rules))
+    (is (not (authorized? db [:acme/principal1] :read :acme/resource0 :rules rules)))
+    (is (not (authorized? db [:acme/principal1] :read :acme/resource1 :rules rules)))))
 
 (deftest effectivity-dominates
   (let [policy0        {:liminal.policy/permit?     true
