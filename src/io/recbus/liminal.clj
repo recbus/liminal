@@ -56,6 +56,19 @@
                   [(a* ?e ?a)
                    [(ground :liminal.action/*) ?a]]
 
+                  [(*p ?p ?e)
+                   [(identity ?p) ?e]]
+                  [(*p ?p ?e)
+                   (p-walk ?e ?p)]
+
+                  [(*r ?r ?e)
+                   [(identity ?r) ?e]]
+                  [(*r ?r ?e)
+                   (r-walk ?e ?r)]
+
+                  [(*a ?a ?e)
+                   [(identity ?a) ?e]]
+
                   ;; This rule unifies the candidate principle (?p), action (?a) and resource (?r) to a policy ?policy,
                   ;; where principal and resource unification can either be through explicit entity attributes or indirectly
                   ;; via a schema attribute entity.
@@ -84,6 +97,31 @@
                   ;; that should never be enumerated on any policy.
                   [(pr-relation ?p ?r ?relation)
                    [(ground ::unknown) ?relation]]])
+
+(defn policies
+  "Find applicable policies for any two of the three constraints #{`principal`, `action`, `resource`}."
+  [db principal action resource {:keys [context rules] :or {context {} rules []} :as options}]
+  (let [rules (concat base-rules rules)
+        bindings (reverse (sort-by key {principal '[?principal ?p p* *p (pull ?principal [:db/ident])]
+                                        action '[?action ?a a* *a ?a]
+                                        resource '[?resource ?r r* *r (pull ?resource [:db/ident])]}))
+        q {:query '{:find [(pull ?policy [*])]
+                    :in [$ %]
+                    :where []}
+           :args [db rules]}
+        q (reduce (fn [q [v [input b-name clause* *clause find]]]
+                    (if (nil? v)
+                      (-> q
+                          (update-in [:query :find] conj find)
+                          (update-in [:query :where] conj '(policy ?policy ?p ?a ?r))
+                          (update-in [:query :where] conj (list *clause b-name input)))
+                      (-> q
+                          (update-in [:query :in] conj input)
+                          (update-in [:query :where] conj (list clause* input b-name))
+                          (update :args conj v))))
+                  q
+                  bindings)]
+    (d/q q)))
 
 (defn list-scopes
   [db principal action resource]
