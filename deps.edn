@@ -1,8 +1,8 @@
 {:mvn/repos {"datomic-cloud" {:url       "s3://datomic-releases-1fc2183a/maven/releases"
                               :snapshots {:enabled false}}}
- :deps      {com.cognitect/anomalies  {:mvn/version "0.1.12"}
-             com.datomic/client-cloud {:mvn/version "1.0.123" :scope "provided"}
-             org.clojure/clojure      {:mvn/version "1.11.1"}}
+ :deps      {com.cognitect/anomalies {:mvn/version "0.1.12"}
+             com.datomic/client      {:mvn/version "1.0.131"}
+             org.clojure/clojure     {:mvn/version "1.11.1"}}
 
  :paths ["src" "resources"]
 
@@ -24,8 +24,8 @@
                       :main-opts ["-m" "antq.core"]}
 
            :test {:extra-paths ["classes" "test" "test-resources"]
-                  :extra-deps  {com.datomic/local                   {:mvn/version "1.0.267"}
-                                com.google.guava/guava              {:mvn/version "31.0.1-jre"}}
+                  :extra-deps  {com.datomic/local      {:mvn/version "1.0.267"}
+                                com.google.guava/guava {:mvn/version "31.0.1-jre"}}
                   :jvm-opts    ["-XX:-OmitStackTraceInFastThrow"]}
 
            :test-runner {:extra-deps {com.cognitect/test-runner      {:git/url "https://github.com/cognitect-labs/test-runner.git"
