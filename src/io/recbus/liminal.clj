@@ -128,15 +128,6 @@
                   inputs)]
     (d/q q)))
 
-(defn list-scopes
-  [db principal action resource]
-  (d/q {:query {:find '[?p ?a ?r]
-                :in '[$ % ?principal ?action ?resource]
-                :where '[(p* ?principal ?p)
-                         (a* ?action ?a)
-                         (r* ?resource ?r)]}
-        :args [db base-rules principal action resource]}))
-
 (defn evaluate
   [db principals action resource {:keys [context rules] :or {context {} rules []} :as options}]
   (let [rules (concat base-rules rules)
