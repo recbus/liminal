@@ -99,28 +99,31 @@
                    [(ground ::unknown) ?relation]]])
 
 (defn policies
-  "Find applicable policies for any two of the three constraints #{`principal`, `action`, `resource`}."
+  "Find applicable policies (and satisfying values) for arbitrary combinations of the three constraints #{`principal`, `action`, `resource`}."
   [db principal action resource {:keys [context rules] :or {context {} rules []} :as options}]
   (let [rules (concat base-rules rules)
-        bindings (reverse (sort-by key {principal '[?principal ?p p* *p (pull ?principal [:db/ident])]
-                                        action '[?action ?a a* *a ?a]
-                                        resource '[?resource ?r r* *r (pull ?resource [:db/ident])]}))
+        ingredients {:principal '[?principal ?p p* *p (pull ?principal [:db/ident])]
+                     :action '[?action ?a a* *a ?action]
+                     :resource '[?resource ?r r* *r (pull ?resource [:db/ident])]}
+        inputs {:principal principal
+                :action action
+                :resource resource}
         q {:query '{:find [(pull ?policy [*])]
                     :in [$ %]
-                    :where []}
+                    :where [(policy ?policy ?p ?a ?r)]}
            :args [db rules]}
-        q (reduce (fn [q [v [input b-name clause* *clause find]]]
-                    (if (nil? v)
-                      (-> q
-                          (update-in [:query :find] conj find)
-                          (update-in [:query :where] conj '(policy ?policy ?p ?a ?r))
-                          (update-in [:query :where] conj (list *clause b-name input)))
-                      (-> q
-                          (update-in [:query :in] conj input)
-                          (update-in [:query :where] conj (list clause* input b-name))
-                          (update :args conj v))))
+        q (reduce (fn [q [k v]]
+                    (let [[input b-name clause* *clause find] (ingredients k)]
+                      (if (nil? v)
+                        (-> q
+                            (update-in [:query :find] conj find)
+                            (update-in [:query :where] conj (list *clause b-name input)))
+                        (-> q
+                            (update-in [:query :in] conj input)
+                            (update-in [:query :where] (comp vec #(concat [(list clause* input b-name)] %)))
+                            (update :args conj v)))))
                   q
-                  bindings)]
+                  inputs)]
     (d/q q)))
 
 (defn list-scopes

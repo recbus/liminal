@@ -4,7 +4,7 @@
             [clojure.test :refer [deftest are is use-fixtures]]
             [datomic.client.api :as d]
             [datomic.local :as dl]
-            [io.recbus.liminal :refer [authorized? evaluate] :as sut])
+            [io.recbus.liminal :refer [authorized? evaluate policies] :as sut])
   (:import (java.io PushbackReader)))
 
 (defn runt-fn!
@@ -223,3 +223,53 @@
         {db :db-after} (d/transact *connection* {:tx-data [policy]})]
     (is (authorized? db [:acme/principal0] :write :acme/resource0 :context {:source "192.168.1.1"}))
     (is (not (authorized? db [:acme/principal0] :write :acme/resource0 :context {:source "192.168.1.2"})))))
+
+(deftest list-policies-by-principal
+  (let [policy0        {:liminal.policy/documentation "0"
+                        :liminal.policy/permit?       true
+                        :liminal.policy/effectivity   0
+                        :liminal.policy/principal     :acme/foo
+                        :liminal.policy/action        :read
+                        :liminal.policy/resource      :acme/resource0}
+        policy1        {:liminal.policy/documentation "1"
+                        :liminal.policy/permit?       true
+                        :liminal.policy/effectivity   0
+                        :liminal.policy/principal     :acme/principal1
+                        :liminal.policy/action        :delete
+                        :liminal.policy/resource      :acme/resource1}
+        policy2        {:liminal.policy/documentation "2"
+                        :liminal.policy/permit?       true
+                        :liminal.policy/effectivity   0
+                        :liminal.policy/principal     :acme/principal0
+                        :liminal.policy/action        :write
+                        :liminal.policy/resource      :acme/bar}
+        {db :db-after} (d/transact *connection* {:tx-data [policy0 policy1 policy2]})]
+    (is (= #{}
+           (into #{} (comp (filter (comp :liminal.policy/permit? first))
+                           (map second)
+                           (map :db/ident))
+                 (policies db nil :annihilate nil {}))))
+    (is (= #{:acme/principal0 :acme/principal1 :acme/foo}
+           (into #{} (comp (filter (comp :liminal.policy/permit? first))
+                           (map second)
+                           (map :db/ident))
+                 (policies db nil :read nil {}))))
+    (is (= #{:acme/principal0 :acme/principal1 :acme/foo}
+           (into #{} (comp (filter (comp :liminal.policy/permit? first))
+                           (map second)
+                           (map :db/ident))
+                 (policies db nil :read :acme/resource0 {}))))
+    (is (= #{}
+           (into #{} (comp (filter (comp :liminal.policy/permit? first))
+                           (map second)
+                           (map :db/ident))
+                 (policies db nil :read :acme/resource1 {}))))
+    (is (= #{:acme/principal0 :acme/principal1 :acme/foo}
+           (into #{} (comp (filter (comp :liminal.policy/permit? first))
+                           (map second)
+                           (map :db/ident))
+                 (policies db nil nil :acme/resource0 {}))))
+    (is (= #{:read :write}
+           (into #{} (comp (filter (comp :liminal.policy/permit? first))
+                           (map (fn [[_ _ x & _]] x)))
+                 (policies db nil nil :acme/resource0 {}))))))
