@@ -249,12 +249,12 @@
                            (map second)
                            (map :db/ident))
                  (policies db nil :annihilate nil {}))))
-    (is (= #{:acme/principal0 :acme/principal1 :acme/foo}
+    (is (= #{:acme/principal0 :acme/principal1}
            (into #{} (comp (filter (comp :liminal.policy/permit? first))
                            (map second)
                            (map :db/ident))
                  (policies db nil :read nil {}))))
-    (is (= #{:acme/principal0 :acme/principal1 :acme/foo}
+    (is (= #{:acme/principal0 :acme/principal1}
            (into #{} (comp (filter (comp :liminal.policy/permit? first))
                            (map second)
                            (map :db/ident))
@@ -264,7 +264,7 @@
                            (map second)
                            (map :db/ident))
                  (policies db nil :read :acme/resource1 {}))))
-    (is (= #{:acme/principal0 :acme/principal1 :acme/foo}
+    (is (= #{:acme/principal0 :acme/principal1}
            (into #{} (comp (filter (comp :liminal.policy/permit? first))
                            (map second)
                            (map :db/ident))
