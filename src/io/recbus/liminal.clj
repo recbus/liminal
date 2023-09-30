@@ -1,29 +1,6 @@
 (ns io.recbus.liminal
   (:require [datomic.client.api :as d]))
 
-(defn- drop-when-change
-  "Return a stateful transducer that drops all remaining elements when (f element) changes from (f (first element))."
-  [f]
-  (fn [rf]
-    (let [tracker (volatile! ::none)]
-      (fn drop-when-change
-        ([] (rf))
-        ([coll] (rf coll))
-        ([coll element]
-         (let [v (f element)]
-           (if (identical? @tracker ::none)
-             (do (vreset! tracker v)
-                 (rf coll element))
-             (if (= @tracker v)
-               (rf coll element)
-               (ensure-reduced coll)))))))))
-
-(defn- satisfied?
-  [condition context]
-  (if-let [f (requiring-resolve condition)]
-    (f context)
-    (throw (ex-info "Condition symbol not resolved!" {::condition condition ::context context}))))
-
 (def base-rules '[;; walk a graph from ?from to ?to via ?attr
                   [(p-walk ?from ?to)
                    [?from :liminal.principal/children ?to]]
@@ -128,6 +105,19 @@
                   inputs)]
     (d/q q)))
 
+(defn- policy-comparator
+  "Compare by effectivity (higher first) then deny-before-permit."
+  [[e0 p0?] [e1 p1?]]
+  (compare [e1 (not p1?)] [e0 (not p0?)]))
+
+(defn- satisfied?
+  [context {condition :liminal.policy/condition :as policy}]
+  (if condition
+    (if-let [f (requiring-resolve condition)]
+      (when (f context) policy)
+      (throw (ex-info "Condition symbol not resolved!" {::condition condition ::context context})))
+    policy))
+
 (defn evaluate
   [db principals action resource {:keys [context rules] :or {context {} rules []} :as options}]
   (let [rules (concat base-rules rules)
@@ -139,23 +129,9 @@
                                              (policy ?policy ?p ?a ?r)]}
                             :args [db rules principals action resource]})
                       (map first)
-                      (sort-by :liminal.policy/effectivity (fn [x y] (compare y x))))
+                      (sort-by (juxt :liminal.policy/effectivity :liminal.policy/permit?) policy-comparator))
         ;; Evaluate policies such that the presumably expensive `satisfied?` operation is short-circuted as soon as possible
-        decision (when (seq policies)
-                   (transduce (comp (filter (fn [{:liminal.policy/keys [condition] :as policy}]
-                                              (if condition
-                                                (satisfied? condition (assoc context
-                                                                             ::db db
-                                                                             ::policy policy
-                                                                             ::principals principals
-                                                                             ::action action
-                                                                             ::resource resource))
-                                                true)))
-                                    (drop-when-change :liminal.policy/effectivity))
-                              (completing (fn [allow? {:liminal.policy/keys [permit?] :as policy}]
-                                            (and allow? permit?)))
-                              true
-                              policies))]
+        decision (:liminal.policy/permit? (some (partial satisfied? context) policies))]
     [decision policies]))
 
 (defn authorized?

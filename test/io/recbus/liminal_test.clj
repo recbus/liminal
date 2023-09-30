@@ -76,7 +76,8 @@
     (is (authorized? db [:acme/principal0] :read :acme/resource0))
     (is (not (authorized? db [:acme/principal0] :read :acme/resource1)))
     (is (not (authorized? db [:acme/principal1] :read :acme/resource0)))
-    (is (not (authorized? db [:acme/principal1] :read :acme/resource1)))))
+    (is (not (authorized? db [:acme/principal1] :read :acme/resource1)))
+    (is (not (authorized? db [:acme/principal0] :write :acme/resource0)))))
 
 (deftest wildcard-principal-policy
   (let [policy {:liminal.policy/permit?   true
