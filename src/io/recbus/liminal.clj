@@ -78,29 +78,24 @@
                    [(ground ::unknown) ?relation]]])
 
 (defn policies
-  "Find applicable policies (and satisfying values) for arbitrary combinations of the three constraints #{`principal`, `action`, `resource`}."
+  "Find applicable policies (and satisfying values) for arbitrary combinations of
+  the three constraints #{`principal`, `action`, `resource`}."
   [db principal action resource {:keys [context rules] :or {context {} rules []} :as options}]
   (let [rules (concat base-rules rules)
-        ingredients {:principal '[?principal ?p p* *p (pull ?principal [:db/ident])]
-                     :action '[?action ?a a* *a ?action]
-                     :resource '[?resource ?r r* *r (pull ?resource [:db/ident])]}
-        inputs {:principal principal
-                :action action
-                :resource resource}
+        inputs [[principal '[?principal ?p ?p-out p* *p (pull ?p-out [:db/ident])]]
+                [action '[?action ?a ?a-out a* *a ?a-out]]
+                [resource '[?resource ?r ?r-out r* *r (pull ?r-out [:db/ident])]]]
         q {:query '{:find [(pull ?policy [*])]
-                    :in [$ %]
+                    :in [$ % [?principal ?action ?resource]]
                     :where [(policy ?policy ?p ?a ?r)]}
-           :args [db rules]}
-        q (reduce (fn [q [k v]]
-                    (let [[input b-name clause* *clause find] (ingredients k)]
-                      (if (nil? v)
-                        (-> q
-                            (update-in [:query :find] conj find)
-                            (update-in [:query :where] conj (list *clause b-name input)))
-                        (-> q
-                            (update-in [:query :in] conj input)
-                            (update-in [:query :where] (comp vec #(concat [(list clause* input b-name)] %)))
-                            (update :args conj v)))))
+           :args [db rules [principal action resource]]}
+        q (reduce (fn [q [v [input b-name output clause* *clause find]]]
+                    (if (nil? v)
+                      (-> q
+                          (update-in [:query :find] conj find)
+                          (update-in [:query :where] conj (list *clause b-name output)))
+                      (-> q
+                          (update-in [:query :where] (comp vec #(concat [(list clause* input b-name)] %))))))
                   q
                   inputs)]
     (d/q q)))
