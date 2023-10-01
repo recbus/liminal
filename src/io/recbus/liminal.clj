@@ -51,14 +51,12 @@
                   ;; via a schema attribute entity.
                   [(policy ?policy ?p ?a ?r)
                    (or-join [?policy ?p]
-                            (and [?policy :liminal.policy/principal ?p]
-                                 (not [?p :db/valueType]))
+                            [?policy :liminal.policy/principal ?p]
                             (and [?policy :liminal.policy/principal ?attr]
                                  [?p ?attr]))
                    [?policy :liminal.policy/action ?a]
                    (or-join [?policy ?r]
-                            (and [?policy :liminal.policy/resource ?r]
-                                 (not [?r :db/valueType]))
+                            [?policy :liminal.policy/resource ?r]
                             (and [?policy :liminal.policy/resource ?attr]
                                  [?r ?attr]))]
 
