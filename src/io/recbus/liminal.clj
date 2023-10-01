@@ -77,6 +77,12 @@
                   [(pr-relation ?p ?r ?relation)
                    [(ground ::unknown) ?relation]]])
 
+(defn- policy-comparator
+  "Compare by effectivity (higher first) then deny-before-permit."
+  [{e0 :liminal.policy/effectivity p0? :liminal.policy/permit?}
+   {e1 :liminal.policy/effectivity p1? :liminal.policy/permit?}]
+  (compare [e1 (not p1?)] [e0 (not p0?)]))
+
 (defn policies
   "Find applicable policies (and satisfying values) for arbitrary combinations of
   the three constraints #{`principal`, `action`, `resource`}."
@@ -98,12 +104,8 @@
                           (update-in [:query :where] (comp vec #(concat [(list clause* input b-name)] %))))))
                   q
                   inputs)]
-    (d/q q)))
-
-(defn- policy-comparator
-  "Compare by effectivity (higher first) then deny-before-permit."
-  [[e0 p0?] [e1 p1?]]
-  (compare [e1 (not p1?)] [e0 (not p0?)]))
+    (->> (d/q q)
+         (sort-by first policy-comparator))))
 
 (defn- satisfied?
   [context {condition :liminal.policy/condition :as policy}]
@@ -124,7 +126,7 @@
                                              (policy ?policy ?p ?a ?r)]}
                             :args [db rules principals action resource]})
                       (map first)
-                      (sort-by (juxt :liminal.policy/effectivity :liminal.policy/permit?) policy-comparator))
+                      (sort policy-comparator))
         ;; Evaluate policies such that the presumably expensive `satisfied?` operation is short-circuted as soon as possible
         decision (:liminal.policy/permit? (some (partial satisfied? context) policies))]
     [decision policies]))
