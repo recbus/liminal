@@ -33,19 +33,6 @@
                   [(a* ?e ?a)
                    [(ground :liminal.action/*) ?a]]
 
-                  [(*p ?p ?e)
-                   [(identity ?p) ?e]]
-                  [(*p ?p ?e)
-                   (p-walk ?e ?p)]
-
-                  [(*r ?r ?e)
-                   [(identity ?r) ?e]]
-                  [(*r ?r ?e)
-                   (r-walk ?e ?r)]
-
-                  [(*a ?a ?e)
-                   [(identity ?a) ?e]]
-
                   ;; This rule unifies the candidate principle (?p), action (?a) and resource (?r) to a policy ?policy,
                   ;; where principal and resource unification can either be through explicit entity attributes or indirectly
                   ;; via a schema attribute entity.
@@ -75,6 +62,19 @@
                   [(pr-relation ?p ?r ?relation)
                    [(ground ::unknown) ?relation]]])
 
+(def reverse-walk-rules '[[(*p ?p ?e)
+                           [(identity ?p) ?e]]
+                          [(*p ?p ?e)
+                           (p-walk ?e ?p)]
+
+                          [(*r ?r ?e)
+                           [(identity ?r) ?e]]
+                          [(*r ?r ?e)
+                           (r-walk ?e ?r)]
+
+                          [(*a ?a ?e)
+                           [(identity ?a) ?e]]])
+
 (defn- policy-comparator
   "Compare by effectivity (higher first) then deny-before-permit."
   [{e0 :liminal.policy/effectivity p0? :liminal.policy/permit?}
@@ -85,7 +85,7 @@
   "Find applicable policies (and satisfying values) for arbitrary combinations of
   the three constraints #{`principal`, `action`, `resource`}."
   [db principal action resource {:keys [context rules] :or {context {} rules []} :as options}]
-  (let [rules (concat base-rules rules)
+  (let [rules (concat base-rules reverse-walk-rules rules)
         inputs [[principal '[?principal ?p ?p-out p* *p (pull ?p-out [:db/ident])]]
                 [action '[?action ?a ?a-out a* *a ?a-out]]
                 [resource '[?resource ?r ?r-out r* *r (pull ?r-out [:db/ident])]]]
