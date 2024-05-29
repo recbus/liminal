@@ -6,4 +6,12 @@
   :db/cardinality :db.cardinality/one}
  {:db/ident       :acme/bar
   :db/valueType   :db.type/long
-  :db/cardinality :db.cardinality/one}]
+  :db/cardinality :db.cardinality/one}
+ {:db/ident       :acme/uid
+  :db/valueType   :db.type/long
+  :db/cardinality :db.cardinality/one
+  :db/unique      :db.unique/identity}
+ {:db/ident       :acme/pn
+  :db/valueType   :db.type/string
+  :db/cardinality :db.cardinality/one
+  :db/unique      :db.unique/identity}]

@@ -1,7 +1,7 @@
 (ns io.recbus.liminal-test
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
-            [clojure.test :refer [deftest are is use-fixtures]]
+            [clojure.test :refer [are deftest is testing use-fixtures]]
             [datomic.client.api :as d]
             [datomic.local :as dl]
             [io.recbus.liminal :refer [authorized? evaluate policies] :as sut])
@@ -274,3 +274,15 @@
            (into #{} (comp (filter (comp :liminal.policy/permit? first))
                            (map (fn [[_ _ x & _]] x)))
                  (policies db nil nil :acme/resource0 {}))))))
+
+;; Despite the temptation, this test ensures liminal is only responsible for answering
+;; "does P have authorization to do A to R?", not "does P exist?" or "does R exist?".
+(deftest missing-principal
+  (testing "missing principal"
+    (let [db (d/db *connection*)]
+      (is (thrown? Exception (authorized? db [:acme/principalX] :read :acme/resource0)))
+      (is (thrown? Exception (authorized? db [[:acme/uid 99999]] :read :acme/resource0)))))
+  (testing "missing resource"
+    (let [db (d/db *connection*)]
+      (is (thrown? Exception (authorized? db [:acme/principal0] :read :acme/resourceX)))
+      (is (thrown? Exception (authorized? db [:acme/principal0] :read [:acme/pn "X"]))))))
