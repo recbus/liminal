@@ -1,7 +1,4 @@
-{:mvn/repos {"datomic-cloud" {:url       "s3://datomic-releases-1fc2183a/maven/releases"
-                              :snapshots {:enabled false}}}
- :deps      {com.cognitect/anomalies {:mvn/version "0.1.12"}
-             com.datomic/client      {:mvn/version "1.0.134"}
+{:deps      {com.cognitect/anomalies {:mvn/version "0.1.12"}
              org.clojure/clojure     {:mvn/version "1.11.3"}}
 
  :paths ["src" "resources"]
